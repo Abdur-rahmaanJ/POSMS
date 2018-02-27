@@ -4,14 +4,24 @@
 """
 
 from tkinter import *
+from tkinter.ttk import *
+from utils.posmsdb import DB
 
 root = Tk()
 root.title('POSMS')
+
+db = DB()
+
+
 
 def manual_add():
     '''
     manually add subscribers
     '''
+    def add(mail):
+        db.add_subs(mail)
+        subs_add_entry.delete(0,END)
+        
     subsaddwin = Toplevel(root)
     subsaddwin.title('Add subscriber')
     
@@ -23,7 +33,8 @@ def manual_add():
     subs_add_entry = Entry(subsaddwin)
     subs_add_entry.grid(column=0, row=1)
     #add subs button
-    subs_add_but = Button(subsaddwin)
+    subs_add_but = Button(subsaddwin, 
+                          command = lambda: add(subs_add_entry.get()) )
     subs_add_but['text'] = 'add'
     subs_add_but.grid(column=0, row=2)
 
@@ -66,6 +77,7 @@ def edit_send():
     send_mail.grid(column=0, row=8)
     
 def view_subs():
+    global db
     '''
     view subscribed users
     '''
@@ -75,7 +87,20 @@ def view_subs():
     ##label
     editwin_top_l = Label(viewwin, text="View subscribed users")
     editwin_top_l.grid(column=0, row=0) 
-
+    
+    tree = Treeview(viewwin, columns=('id', 'mail') )
+    tree["columns"]=("id","mail")
+    tree.column("id")
+    tree.column("mail")
+    tree.heading("id", text="ID")
+    tree.heading("mail", text="MAIL")
+    x = db.view_subs()
+    i = 1
+    for row in x:
+        tree.insert('', 'end', text=str(i), values=(row[0], row[1])) 
+        i+=1
+    tree.grid(column=0, row=1)
+    
 def rem_subs():
     '''
     unsubscribe a user manually
